@@ -17,7 +17,7 @@ class TodoListVC: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-   
+   print(dataFilePath)
         
         let newItem = Item(title: "Find Ann")
         itemArray.append(newItem)
@@ -61,9 +61,9 @@ class TodoListVC: UITableViewController {
         if currentCell?.isSelected == true{
             currentCell?.isSelected = false
         }
-        
         itemArray[indexPath.row].done.toggle()
         
+        saveItems()
         tableView.reloadData()
     }
     
@@ -76,15 +76,7 @@ class TodoListVC: UITableViewController {
         let action = UIAlertAction(title: "Add Item", style: .default) { action in
             let newItem = Item(title: textField.text!)
             self.itemArray.append(newItem)
-            
-            let encoder = PropertyListEncoder()
-            
-            do{
-                let data = try encoder.encode(self.itemArray)
-                try data.write(to: self.dataFilePath!)
-            } catch {
-                print("Error encoding item array, \(error)")
-            }
+            self.saveItems()
             
             self.tableView.reloadData()
         }
@@ -97,6 +89,18 @@ class TodoListVC: UITableViewController {
         alert.addAction(action)
         present(alert, animated: true)
         
+    }
+    
+    
+    func saveItems(){
+        let encoder = PropertyListEncoder()
+        
+        do{
+            let data = try encoder.encode(itemArray)
+            try data.write(to: dataFilePath!)
+        } catch {
+            print("Error encoding item array, \(error)")
+        }
     }
     
     
