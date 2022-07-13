@@ -9,5 +9,6 @@
 import Foundation
 
 struct K{
-   static let TodoListCellIdentifire = "TodoItemCell"
+    static let todoListCellIdentifire = "TodoItemCell"
+    static let todoListArrayUserDefaultsKey = "TodoListArray"
 }

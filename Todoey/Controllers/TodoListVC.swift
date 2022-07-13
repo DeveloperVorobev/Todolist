@@ -10,10 +10,24 @@ import UIKit
 
 class TodoListVC: UITableViewController {
     
-    var itemArray = ["Find Mike", "Bye Milk", "Destroy Demogorgon"]
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Item.plist")
+    
+    var itemArray = [Item]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+   
+        
+        let newItem = Item(title: "Find Ann")
+        itemArray.append(newItem)
+        
+        let newItem2 = Item(title: "Find Ann1")
+        itemArray.append(newItem2)
+        
+        let newItem3 = Item(title: "Find Ann2")
+        itemArray.append(newItem3)
+        
     }
     
     // MARK: - Table View Data Source
@@ -24,39 +38,54 @@ class TodoListVC: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: K.TodoListCellIdentifire, for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: K.todoListCellIdentifire, for: indexPath)
+        let imem = itemArray[indexPath.row]
         
         var content = cell.defaultContentConfiguration()
-        content.text = itemArray[indexPath.row]
+        content.text = itemArray[indexPath.row].title
         cell.contentConfiguration = content
+        
+        cell.accessoryType = imem.done ? .checkmark : .none
         
         
         return cell
     }
     
     // MARK: - Table View Delegate
-
+    
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        print(itemArray[indexPath.row])
         tableView.deselectRow(at: indexPath, animated: true)
         
         let currentCell = tableView.cellForRow(at: indexPath)
         
-        if currentCell?.accessoryType == .checkmark{
-            currentCell?.accessoryType = .none
-        } else {
-            currentCell?.accessoryType = .checkmark
+        if currentCell?.isSelected == true{
+            currentCell?.isSelected = false
         }
+        
+        itemArray[indexPath.row].done.toggle()
+        
+        tableView.reloadData()
     }
     
-   // MARK: - Add Items
+    // MARK: - Add Items
     
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         let alert = UIAlertController(title: "Add now todoy item", message: "", preferredStyle: .alert)
         var textField = UITextField()
         
         let action = UIAlertAction(title: "Add Item", style: .default) { action in
-            self.itemArray.append(textField.text!)
+            let newItem = Item(title: textField.text!)
+            self.itemArray.append(newItem)
+            
+            let encoder = PropertyListEncoder()
+            
+            do{
+                let data = try encoder.encode(self.itemArray)
+                try data.write(to: self.dataFilePath!)
+            } catch {
+                print("Error encoding item array, \(error)")
+            }
+            
             self.tableView.reloadData()
         }
         
