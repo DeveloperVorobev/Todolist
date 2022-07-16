@@ -7,26 +7,20 @@
 //
 
 import UIKit
+import CoreData
 
 class TodoListVC: UITableViewController {
     
-    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Item.plist")
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     var itemArray = [Item]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-   print(dataFilePath)
+        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
         
-        let newItem = Item(title: "Find Ann")
-        itemArray.append(newItem)
-        
-        let newItem2 = Item(title: "Find Ann1")
-        itemArray.append(newItem2)
-        
-        let newItem3 = Item(title: "Find Ann2")
-        itemArray.append(newItem3)
+        loadItems()
         
     }
     
@@ -74,11 +68,14 @@ class TodoListVC: UITableViewController {
         var textField = UITextField()
         
         let action = UIAlertAction(title: "Add Item", style: .default) { action in
-            let newItem = Item(title: textField.text!)
+            
+            let newItem = Item(context: self.context)
+            newItem.title = textField.text!
+            newItem.done = false
+            
             self.itemArray.append(newItem)
             self.saveItems()
             
-            self.tableView.reloadData()
         }
         
         alert.addTextField { alertTF in
@@ -93,16 +90,28 @@ class TodoListVC: UITableViewController {
     
     
     func saveItems(){
-        let encoder = PropertyListEncoder()
-        
         do{
-            let data = try encoder.encode(itemArray)
-            try data.write(to: dataFilePath!)
+            try context.save()
+            print("Succes save")
         } catch {
-            print("Error encoding item array, \(error)")
+            print("Error to save data \(error)")
         }
+        self.tableView.reloadData()
     }
     
+    func loadItems(){
+        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        do{
+            itemArray = try context.fetch(request)
+        } catch {
+            print("Error in fetch data \(error)")
+        }
+        
+    }
+    
+}
+
+extension TodoListVC: UISearchBarDelegate{
     
 }
 
