@@ -11,4 +11,7 @@ import Foundation
 struct K{
     static let todoListCellIdentifire = "TodoItemCell"
     static let todoListArrayUserDefaultsKey = "TodoListArray"
+    static let todoListSegueIdentifire = "goToItems"
+    static let categoryCellIdentifire = "CategoryCell"
+    
 }

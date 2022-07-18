@@ -1,0 +1,21 @@
+//
+//  ItemRealmModel.swift
+//  Todoey
+//
+//  Created by Владислав Воробьев on 18.07.2022.
+//  Copyright © 2022 App Brewery. All rights reserved.
+//
+
+import Foundation
+import RealmSwift
+
+class ItemRealmModel: Object {
+    @Persisted var title: String = ""
+    @Persisted var done: Bool = false
+    @Persisted var parentCategory: String?
+
+    convenience init(title: String) {
+        self.init()
+        self.title = title
+    }
+}
