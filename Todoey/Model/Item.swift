@@ -9,13 +9,11 @@
 import Foundation
 import RealmSwift
 
-class ItemRealmModel: Object {
+class Item: Object {
     @Persisted var title: String = ""
     @Persisted var done: Bool = false
-    @Persisted var parentCategory: String?
-
-    convenience init(title: String) {
-        self.init()
-        self.title = title
-    }
+    @Persisted var createdDate: Date?
+    
+    var parentCategory = LinkingObjects(fromType: Category.self, property: "items")
+    
 }

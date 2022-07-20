@@ -8,12 +8,13 @@
 
 import UIKit
 import CoreData
+import RealmSwift
 
 class CategoryVC: UITableViewController {
     
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    let realm = try! Realm()
     
-    var categoryArray = [Category]()
+    var categoryArray: Results<Category>?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,11 +31,10 @@ class CategoryVC: UITableViewController {
         
         let action = UIAlertAction(title: "Add category", style: .default) { action in
             
-            let newCategory = Category(context: self.context)
+            let newCategory = Category()
             newCategory.name = textField.text!
             
-            self.categoryArray.append(newCategory)
-            self.saveCategories()
+            self.saveCategories(category: newCategory)
             
         }
         alert.addTextField { alertFT in
@@ -47,9 +47,11 @@ class CategoryVC: UITableViewController {
     
     // MARK: - Data Methods
     
-    func saveCategories(){
+    func saveCategories(category: Category){
         do {
-            try context.save()
+            try realm.write{
+                realm.add(category)
+            }
             print("Succes Save")
         } catch {
             print("Save error \(error)")
@@ -57,27 +59,22 @@ class CategoryVC: UITableViewController {
         tableView.reloadData()
     }
     
-    func loadCategories(for request: NSFetchRequest<Category> = Category.fetchRequest()) {
-        do{
-            categoryArray = try context.fetch(request)
-            print("Succes Load")
-        } catch {
-            print("Error in fetch data \(error)")
-        }
+    func loadCategories() {
+        categoryArray = realm.objects(Category.self)
         tableView.reloadData()
     }
     // MARK: - Table View Data Source
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categoryArray.count
+        return categoryArray?.count ?? 1
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: K.categoryCellIdentifire, for: indexPath)
-        let category = categoryArray[indexPath.row]
+        let category = categoryArray?[indexPath.row]
         
         var content = cell.defaultContentConfiguration()
-        content.text = category.name
+        content.text = category?.name ?? "Empty list"
         cell.contentConfiguration = content
         
         return cell
@@ -87,15 +84,15 @@ class CategoryVC: UITableViewController {
         performSegue(withIdentifier: K.todoListSegueIdentifire, sender: self)
     }
     
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == K.todoListSegueIdentifire{
-            let dectinotionVC = segue.destination as! TodoListVC
-            
-            if let indexPath = tableView.indexPathsForSelectedRows?.first{
-                dectinotionVC.selectedCategory = categoryArray[indexPath.row]
+        override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+            if segue.identifier == K.todoListSegueIdentifire{
+                let dectinotionVC = segue.destination as! TodoListVC
+    
+                if let indexPath = tableView.indexPathsForSelectedRows?.first{
+                    dectinotionVC.selectedCategory = categoryArray?[indexPath.row]
+                }
             }
         }
-    }
     
 }
 

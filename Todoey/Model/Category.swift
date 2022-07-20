@@ -9,11 +9,7 @@
 import Foundation
 import RealmSwift
 
-class CategoryRealmModel: Object {
+class Category: Object {
     @Persisted var name: String = ""
-
-    convenience init(name: String) {
-        self.init()
-        self.name = name
-    }
+    @Persisted var items = List<Item>()
 }
