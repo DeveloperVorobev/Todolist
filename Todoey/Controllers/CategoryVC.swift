@@ -7,10 +7,11 @@
 //
 
 import UIKit
-import CoreData
 import RealmSwift
+import SwipeCellKit
 
-class CategoryVC: UITableViewController {
+
+class CategoryVC: SwipeTableVC {
     
     let realm = try! Realm()
     
@@ -20,6 +21,7 @@ class CategoryVC: UITableViewController {
         super.viewDidLoad()
         
         loadCategories()
+       
     }
     
     // MARK: - Add Items
@@ -33,7 +35,6 @@ class CategoryVC: UITableViewController {
             
             let newCategory = Category()
             newCategory.name = textField.text!
-            
             self.saveCategories(category: newCategory)
             
         }
@@ -63,6 +64,20 @@ class CategoryVC: UITableViewController {
         categoryArray = realm.objects(Category.self)
         tableView.reloadData()
     }
+    
+    override func updateModel(at indexPath: IndexPath) {
+        
+        if let categoryForDelete = self.categoryArray?[indexPath.row]{
+            do{
+                try self.realm.write {
+                    self.realm.delete(categoryForDelete)
+                }
+            } catch {
+                print("Delete error \(error)")
+            }
+        }
+    }
+    
     // MARK: - Table View Data Source
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -70,13 +85,12 @@ class CategoryVC: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: K.categoryCellIdentifire, for: indexPath)
-        let category = categoryArray?[indexPath.row]
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
+        let category = categoryArray?[indexPath.row]
         var content = cell.defaultContentConfiguration()
         content.text = category?.name ?? "Empty list"
         cell.contentConfiguration = content
-        
         return cell
     }
     
@@ -84,15 +98,15 @@ class CategoryVC: UITableViewController {
         performSegue(withIdentifier: K.todoListSegueIdentifire, sender: self)
     }
     
-        override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-            if segue.identifier == K.todoListSegueIdentifire{
-                let dectinotionVC = segue.destination as! TodoListVC
-    
-                if let indexPath = tableView.indexPathsForSelectedRows?.first{
-                    dectinotionVC.selectedCategory = categoryArray?[indexPath.row]
-                }
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == K.todoListSegueIdentifire{
+            let dectinotionVC = segue.destination as! TodoListVC
+            
+            if let indexPath = tableView.indexPathsForSelectedRows?.first{
+                dectinotionVC.selectedCategory = categoryArray?[indexPath.row]
             }
         }
+    }
     
 }
 

@@ -12,6 +12,7 @@ import RealmSwift
 class Item: Object {
     @Persisted var title: String = ""
     @Persisted var done: Bool = false
+    @Persisted var colorForItem: String = ""
     @Persisted var createdDate: Date?
     
     var parentCategory = LinkingObjects(fromType: Category.self, property: "items")

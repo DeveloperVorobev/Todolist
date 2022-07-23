@@ -8,8 +8,9 @@
 
 import UIKit
 import RealmSwift
+import SwipeCellKit
 
-class TodoListVC: UITableViewController {
+class TodoListVC: SwipeTableVC {
     let realm = try! Realm()
     
     var todoItems: Results<Item>?
@@ -34,7 +35,7 @@ class TodoListVC: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: K.todoListCellIdentifire, for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         var content = cell.defaultContentConfiguration()
         
         if let item = todoItems?[indexPath.row]{
@@ -103,6 +104,18 @@ class TodoListVC: UITableViewController {
     func loadItems() {
         todoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
         tableView.reloadData()
+    }
+    
+    override func updateModel(at indexPath: IndexPath) {
+        if let itemForDelete = self.todoItems?[indexPath.row]{
+            do{
+                try self.realm.write {
+                    self.realm.delete(itemForDelete)
+                }
+            } catch {
+                print("Delete error \(error)")
+            }
+        }
     }
 }
 
