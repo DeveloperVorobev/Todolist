@@ -12,12 +12,14 @@ import SwipeCellKit
 import ChameleonFramework
 
 class TodoListVC: SwipeTableVC {
+    @IBOutlet var searchBar: UISearchBar!
+    
     let realm = try! Realm()
     
     var todoItems: Results<Item>?
     var selectedCategory: Category?{
         didSet{
-             loadItems()
+            loadItems()
         }
     }
     
@@ -25,24 +27,26 @@ class TodoListVC: SwipeTableVC {
         super.viewDidLoad()
         
         tableView.rowHeight = 80.0
-        
-        let newNavBarAppearance = customNavBarAppearance()
-        navigationController?.navigationBar.scrollEdgeAppearance = newNavBarAppearance
-            navigationController?.navigationBar.compactAppearance = newNavBarAppearance
-            navigationController?.navigationBar.standardAppearance = newNavBarAppearance
-            if #available(iOS 15.0, *) {
-                navigationController?.navigationBar.compactScrollEdgeAppearance = newNavBarAppearance
-            }
-        
         loadItems()
         
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        let newNavBarAppearance = customNavBarAppearance()
+        navigationController?.navigationBar.scrollEdgeAppearance = newNavBarAppearance
+        navigationController?.navigationBar.compactAppearance = newNavBarAppearance
+        navigationController?.navigationBar.standardAppearance = newNavBarAppearance
+        if #available(iOS 15.0, *) {
+            navigationController?.navigationBar.compactScrollEdgeAppearance = newNavBarAppearance
+        }
     }
     
     // MARK: - Table View Data Source
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-            return todoItems?.count ?? 1
-        }
+        return todoItems?.count ?? 1
+    }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
@@ -135,48 +139,56 @@ class TodoListVC: SwipeTableVC {
             }
         }
     }
-    
+    // MARK: -  Bar Custom Method
     func customNavBarAppearance() -> UINavigationBarAppearance {
         let customNavBarAppearance = UINavigationBarAppearance()
         
-        // Apply a red background.
+        var colorForNavBarText = UIColor()
         customNavBarAppearance.configureWithOpaqueBackground()
-        customNavBarAppearance.backgroundColor = .systemBlue
+        if let hexString = selectedCategory?.colorForCategory{
+            customNavBarAppearance.backgroundColor = UIColor(hexString: hexString)
+             colorForNavBarText = ContrastColorOf(UIColor(hexString: hexString)!, returnFlat: true)
+            navigationController?.view.tintColor = colorForNavBarText
+            title = selectedCategory?.name
+            searchBar.barTintColor = UIColor(hexString: hexString)
+            searchBar.searchTextField.backgroundColor = .white
+            
+        }
         
         // Apply white colored normal and large titles.
-        customNavBarAppearance.titleTextAttributes = [.foregroundColor: UIColor.white]
-        customNavBarAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
+        customNavBarAppearance.titleTextAttributes = [.foregroundColor: colorForNavBarText]
+        customNavBarAppearance.largeTitleTextAttributes = [.foregroundColor: colorForNavBarText]
         
-
         // Apply white color to all the nav bar buttons.
         let barButtonItemAppearance = UIBarButtonItemAppearance(style: .plain)
-        barButtonItemAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.white]
-        barButtonItemAppearance.disabled.titleTextAttributes = [.foregroundColor: UIColor.lightText]
-        barButtonItemAppearance.highlighted.titleTextAttributes = [.foregroundColor: UIColor.label]
-        barButtonItemAppearance.focused.titleTextAttributes = [.foregroundColor: UIColor.white]
+        barButtonItemAppearance.normal.titleTextAttributes = [.foregroundColor: colorForNavBarText]
+        barButtonItemAppearance.disabled.titleTextAttributes = [.foregroundColor: colorForNavBarText]
+        barButtonItemAppearance.highlighted.titleTextAttributes = [.foregroundColor: colorForNavBarText]
+        barButtonItemAppearance.focused.titleTextAttributes = [.foregroundColor: colorForNavBarText]
         customNavBarAppearance.buttonAppearance = barButtonItemAppearance
         customNavBarAppearance.backButtonAppearance = barButtonItemAppearance
         customNavBarAppearance.doneButtonAppearance = barButtonItemAppearance
+        
+        
         
         return customNavBarAppearance
     }
 }
 
-
 // MARK: - SearchBar Method
 extension TodoListVC: UISearchBarDelegate{
-        func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-            if searchText == ""{
-                loadItems()
-    
-                DispatchQueue.main.async {
-                    searchBar.resignFirstResponder()
-                }
-    
-            } else {
-                todoItems = todoItems?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "createdDate", ascending: true)
-                tableView.reloadData()
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchText == ""{
+            loadItems()
+            
+            DispatchQueue.main.async {
+                searchBar.resignFirstResponder()
             }
+            
+        } else {
+            todoItems = todoItems?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "createdDate", ascending: true)
+            tableView.reloadData()
         }
+    }
 }
 

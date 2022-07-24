@@ -23,6 +23,11 @@ class CategoryVC: SwipeTableVC {
         
         tableView.rowHeight = 80.0
         
+        loadCategories()
+       
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
         let newNavBarAppearance = customNavBarAppearance()
         navigationController?.navigationBar.scrollEdgeAppearance = newNavBarAppearance
             navigationController?.navigationBar.compactAppearance = newNavBarAppearance
@@ -31,8 +36,6 @@ class CategoryVC: SwipeTableVC {
                 navigationController?.navigationBar.compactScrollEdgeAppearance = newNavBarAppearance
             }
         
-        loadCategories()
-       
     }
     
     // MARK: - Add Items
@@ -131,7 +134,7 @@ class CategoryVC: SwipeTableVC {
         
         // Apply a red background.
         customNavBarAppearance.configureWithOpaqueBackground()
-        customNavBarAppearance.backgroundColor = .systemBlue
+        customNavBarAppearance.backgroundColor = .systemCyan
         
         // Apply white colored normal and large titles.
         customNavBarAppearance.titleTextAttributes = [.foregroundColor: UIColor.white]
