@@ -9,6 +9,7 @@
 import UIKit
 import RealmSwift
 import SwipeCellKit
+import ChameleonFramework
 
 class TodoListVC: SwipeTableVC {
     let realm = try! Realm()
@@ -22,6 +23,8 @@ class TodoListVC: SwipeTableVC {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        tableView.rowHeight = 80.0
         
         let newNavBarAppearance = customNavBarAppearance()
         navigationController?.navigationBar.scrollEdgeAppearance = newNavBarAppearance
@@ -47,7 +50,14 @@ class TodoListVC: SwipeTableVC {
         var content = cell.defaultContentConfiguration()
         
         if let item = todoItems?[indexPath.row]{
-            content.text = item.title 
+            let categoryColor = UIColor(hexString: selectedCategory!.colorForCategory)!
+            if let gradientColor = categoryColor.darken(byPercentage: CGFloat(indexPath.row) / CGFloat(todoItems!.count)){
+                cell.backgroundColor = gradientColor
+                content.textProperties.color = ContrastColorOf(gradientColor, returnFlat: true)
+                
+            }
+            
+            content.text = item.title
             cell.accessoryType = item.done ? .checkmark : .none
         } else {
             content.text = "Empty category"

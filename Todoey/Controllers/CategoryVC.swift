@@ -9,6 +9,7 @@
 import UIKit
 import RealmSwift
 import SwipeCellKit
+import ChameleonFramework
 
 
 class CategoryVC: SwipeTableVC {
@@ -19,6 +20,8 @@ class CategoryVC: SwipeTableVC {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        tableView.rowHeight = 80.0
         
         let newNavBarAppearance = customNavBarAppearance()
         navigationController?.navigationBar.scrollEdgeAppearance = newNavBarAppearance
@@ -43,6 +46,7 @@ class CategoryVC: SwipeTableVC {
             
             let newCategory = Category()
             newCategory.name = textField.text!
+            newCategory.colorForCategory = UIColor.randomFlat().hexValue()
             self.saveCategories(category: newCategory)
             
         }
@@ -97,6 +101,12 @@ class CategoryVC: SwipeTableVC {
         
         let category = categoryArray?[indexPath.row]
         var content = cell.defaultContentConfiguration()
+        
+        if let hexColor = category?.colorForCategory{
+            cell.backgroundColor = UIColor(hexString: hexColor)
+            content.textProperties.color = ContrastColorOf(UIColor(hexString: hexColor)!, returnFlat: true)
+        }
+        
         content.text = category?.name ?? "Empty list"
         cell.contentConfiguration = content
         return cell
